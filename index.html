@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#090b0f">
+    <meta name="description" content="海外カジノと和風スロット、パチンコをひとつにした無料のブラウザゲーム集。">
+    <title>MIDNIGHT ARCADE — Casino & Pachinko</title>
+    <link rel="icon" href="favicon.svg" type="image/svg+xml">
+    <link rel="stylesheet" href="style.css">
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">ゲームへ移動</a>
+
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a class="brand" href="#lobby" data-open-game="lobby" aria-label="MIDNIGHT ARCADE ロビーへ">
+        <span class="brand-mark" aria-hidden="true">M</span>
+        <span class="brand-copy">
+          <strong>MIDNIGHT</strong>
+          <small>ARCADE / TOKYO</small>
+        </span>
+      </a>
+
+      <nav class="floor-nav" aria-label="ゲームを選ぶ">
+        <button class="nav-item is-active" type="button" data-open-game="lobby" aria-current="page">
+          <span aria-hidden="true">⌂</span> ロビー
+        </button>
+        <button class="nav-item" type="button" data-open-game="slots">
+          <span aria-hidden="true">七</span> スロット
+        </button>
+        <button class="nav-item" type="button" data-open-game="roulette">
+          <span aria-hidden="true">◆</span> ルーレット
+        </button>
+        <button class="nav-item" type="button" data-open-game="blackjack">
+          <span aria-hidden="true">♠</span> ブラックジャック
+        </button>
+        <button class="nav-item" type="button" data-open-game="pachinko">
+          <span aria-hidden="true">●</span> パチンコ
+        </button>
+      </nav>
+
+      <div class="header-tools">
+        <button class="icon-button" id="sound-toggle" type="button" aria-pressed="false" aria-label="サウンドをオンにする">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9H4Zm12.5 3a4.5 4.5 0 0 0-2.1-3.8v7.6a4.5 4.5 0 0 0 2.1-3.8Zm-2.1-8.7v2.1a7.2 7.2 0 0 1 0 13.2v2.1a9.2 9.2 0 0 0 0-17.4Z"/></svg>
+        </button>
+        <button class="wallet" id="wallet-button" type="button" aria-label="練習クレジットを補充">
+          <span class="wallet-label">CREDIT</span>
+          <strong data-balance>2,500</strong>
+          <span class="wallet-plus" aria-hidden="true">＋</span>
+        </button>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <section class="screen lobby-screen is-active" id="screen-lobby" data-screen="lobby">
+        <div class="hero">
+          <div class="hero-copy">
+            <div class="eyebrow"><span class="live-dot" aria-hidden="true"></span> OPEN ALL NIGHT · VIRTUAL PLAY</div>
+            <h1>夜を、<br><em>遊びつくせ。</em></h1>
+            <p class="hero-lead">ラスベガスの熱気と、日本のホールの高揚感。4つのゲームを、ひとつのフロアで。</p>
+            <div class="hero-actions">
+              <button class="primary-button" type="button" data-scroll-games>
+                ゲームを選ぶ <span aria-hidden="true">↓</span>
+              </button>
+              <button class="text-button" type="button" data-open-rules="lobby">はじめての方へ</button>
+            </div>
+          </div>
+
+          <div class="hero-showpiece" aria-hidden="true">
+            <div class="orbit orbit-one"></div>
+            <div class="orbit orbit-two"></div>
+            <div class="hero-chip">
+              <span class="chip-kicker">TONIGHT'S</span>
+              <strong>4</strong>
+              <span>GAMES</span>
+            </div>
+            <span class="floating-mark mark-seven">7</span>
+            <span class="floating-mark mark-diamond">◆</span>
+            <span class="floating-mark mark-sakura">✿</span>
+          </div>
+        </div>
+
+        <div class="floor-stats" aria-label="プレイ状況">
+          <div>
+            <span>YOUR CREDIT</span>
+            <strong><span data-balance>2,500</span> <small>CR</small></strong>
+          </div>
+          <div>
+            <span>TOTAL PLAYS</span>
+            <strong data-total-plays>0</strong>
+          </div>
+          <div>
+            <span>BEST WIN</span>
+            <strong><span data-best-win>0</span> <small>CR</small></strong>
+          </div>
+          <div class="floor-status">
+            <span>FLOOR STATUS</span>
+            <strong><i aria-hidden="true"></i> ALL TABLES OPEN</strong>
+          </div>
+        </div>
+
+        <section class="game-selection" id="game-selection" aria-labelledby="game-selection-title">
+          <div class="section-heading">
+            <div>
+              <span class="section-number">01 / SELECT A GAME</span>
+              <h2 id="game-selection-title">今夜のフロア</h2>
+            </div>
+            <p>すべて無料の仮想クレジット制。<br>好きな台へ、好きなときに。</p>
+          </div>
+
+          <div class="game-grid">
+            <article class="game-card card-slots">
+              <div class="card-art" aria-hidden="true">
+                <span class="art-stamp">JAPAN / SLOT</span>
+                <div class="mini-reels"><b>七</b><b>桜</b><b>BAR</b></div>
+                <span class="art-index">01</span>
+              </div>
+              <div class="card-body">
+                <div class="game-meta"><span>JAPANESE SLOT</span><span>1 PLAYER</span></div>
+                <h3>HANABI <i>3</i></h3>
+                <p>桜、鈴、七。懐かしいリールの手触りを、ネオンの夜に。</p>
+                <button class="card-play" type="button" data-open-game="slots">PLAY NOW <span aria-hidden="true">↗</span></button>
+              </div>
+            </article>
+
+            <article class="game-card card-roulette">
+              <div class="card-art" aria-hidden="true">
+                <span class="art-stamp">EUROPE / TABLE</span>
+                <div class="mini-wheel"><span>0</span></div>
+                <span class="art-index">02</span>
+              </div>
+              <div class="card-body">
+                <div class="game-meta"><span>EUROPEAN ROULETTE</span><span>1 PLAYER</span></div>
+                <h3>ROUGE <i>37</i></h3>
+                <p>赤か黒か、数字か。静かな一投にすべての期待を乗せて。</p>
+                <button class="card-play" type="button" data-open-game="roulette">PLAY NOW <span aria-hidden="true">↗</span></button>
+              </div>
+            </article>
+
+            <article class="game-card card-blackjack">
+              <div class="card-art" aria-hidden="true">
+                <span class="art-stamp">LAS VEGAS / TABLE</span>
+                <div class="mini-cards"><b>A<span>♠</span></b><b>K<span>♥</span></b></div>
+                <span class="art-index">03</span>
+              </div>
+              <div class="card-body">
+                <div class="game-meta"><span>CLASSIC BLACKJACK</span><span>1 PLAYER</span></div>
+                <h3>BLACK <i>21</i></h3>
+                <p>引くか、止めるか。21をめぐる、もっとも鮮やかな駆け引き。</p>
+                <button class="card-play" type="button" data-open-game="blackjack">PLAY NOW <span aria-hidden="true">↗</span></button>
+              </div>
+            </article>
+
+            <article class="game-card card-pachinko">
+              <div class="card-art" aria-hidden="true">
+                <span class="art-stamp">JAPAN / PACHINKO</span>
+                <div class="mini-pachinko"><span></span><span></span><span></span><b>●</b></div>
+                <span class="art-index">04</span>
+              </div>
+              <div class="card-body">
+                <div class="game-meta"><span>SMART PACHINKO</span><span>1 PLAYER</span></div>
+                <h3>SAKURA <i>∞</i></h3>
+                <p>光る盤面、弾ける玉。中央のFEVERポケットを狙え。</p>
+                <button class="card-play" type="button" data-open-game="pachinko">PLAY NOW <span aria-hidden="true">↗</span></button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section class="house-note" aria-labelledby="house-note-title">
+          <span class="house-monogram" aria-hidden="true">M</span>
+          <div>
+            <span class="section-number">HOUSE NOTE</span>
+            <h2 id="house-note-title">ここは、遊ぶためだけの場所。</h2>
+          </div>
+          <p>使用するのは換金できない練習クレジットのみ。課金・広告・景品交換はありません。残高が少なくなったら、いつでも無料で補充できます。</p>
+        </section>
+      </section>
+
+      <section class="screen game-screen" id="screen-slots" data-screen="slots" hidden>
+        <header class="game-heading">
+          <button class="back-button" type="button" data-open-game="lobby"><span aria-hidden="true">←</span> FLOOR</button>
+          <div>
+            <span class="game-kicker">JAPAN / SLOT MACHINE 01</span>
+            <h1 tabindex="-1">HANABI <em>3</em></h1>
+          </div>
+          <button class="rules-button" type="button" data-open-rules="slots">遊び方 <span aria-hidden="true">?</span></button>
+        </header>
+
+        <div class="game-layout slot-layout">
+          <div class="game-stage slot-stage">
+            <div class="machine-topline"><span>PAYLINE</span><strong>HANABI</strong><span>3 REELS</span></div>
+            <div class="slot-machine" aria-label="スロットのリール">
+              <div class="reel" data-reel="0"><span class="reel-symbol symbol-seven">七</span></div>
+              <div class="reel" data-reel="1"><span class="reel-symbol symbol-sakura">桜</span></div>
+              <div class="reel" data-reel="2"><span class="reel-symbol symbol-bar">BAR</span></div>
+              <div class="payline" aria-hidden="true"></div>
+            </div>
+            <div class="slot-stop-controls" aria-label="リール停止ボタン">
+              <button id="slot-stop-0" type="button" disabled><span>STOP</span><small>1</small></button>
+              <button id="slot-stop-1" type="button" disabled><span>STOP</span><small>2</small></button>
+              <button id="slot-stop-2" type="button" disabled><span>STOP</span><small>3</small></button>
+            </div>
+            <div class="machine-message" id="slot-message" aria-live="polite">賭け金を選んで、SPINを押してください。</div>
+          </div>
+
+          <aside class="control-panel">
+            <div class="panel-label"><span>BET</span><strong><span id="slot-bet-display">25</span> CR</strong></div>
+            <div class="bet-options" role="group" aria-label="スロットの賭け金">
+              <button type="button" data-slot-bet="10">10</button>
+              <button class="is-selected" type="button" data-slot-bet="25" aria-pressed="true">25</button>
+              <button type="button" data-slot-bet="50">50</button>
+              <button type="button" data-slot-bet="100">100</button>
+            </div>
+            <button class="action-button action-red" id="slot-spin" type="button">
+              <span>SPIN</span><small>リールを回す</small>
+            </button>
+            <div class="paytable">
+              <div class="panel-label"><span>PAY TABLE</span><small>BET ×</small></div>
+              <ul>
+                <li><span><b class="mini-symbol">七</b> 七七七</span><strong>×20</strong></li>
+                <li><span><b class="mini-symbol">宝</b> 宝宝宝</span><strong>×12</strong></li>
+                <li><span><b class="mini-symbol">B</b> BAR ×3</span><strong>×8</strong></li>
+                <li><span><b class="mini-symbol">桜</b> 桜 ×3</span><strong>×4</strong></li>
+              </ul>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="screen game-screen" id="screen-roulette" data-screen="roulette" hidden>
+        <header class="game-heading">
+          <button class="back-button" type="button" data-open-game="lobby"><span aria-hidden="true">←</span> FLOOR</button>
+          <div>
+            <span class="game-kicker">EUROPE / TABLE GAME 02</span>
+            <h1 tabindex="-1">ROUGE <em>37</em></h1>
+          </div>
+          <button class="rules-button" type="button" data-open-rules="roulette">遊び方 <span aria-hidden="true">?</span></button>
+        </header>
+
+        <div class="game-layout roulette-layout">
+          <div class="game-stage roulette-stage">
+            <div class="roulette-scene">
+              <div class="roulette-wheel" id="roulette-wheel" aria-hidden="true">
+                <div class="roulette-track"></div>
+                <div class="roulette-bowl">
+                  <span class="roulette-result" id="roulette-result">—</span>
+                  <small>RESULT</small>
+                </div>
+              </div>
+              <div class="wheel-marker" aria-hidden="true"></div>
+            </div>
+            <div class="machine-message" id="roulette-message" aria-live="polite">ベット先と賭け金を選んでください。</div>
+            <div class="roulette-history" aria-label="最近の出目">
+              <span>LAST</span>
+              <ol id="roulette-history"></ol>
+            </div>
+          </div>
+
+          <aside class="control-panel roulette-controls">
+            <div class="panel-label"><span>SELECT BET</span><strong id="roulette-bet-label">RED</strong></div>
+            <div class="roulette-bets" role="group" aria-label="ルーレットのベット先">
+              <button class="red-bet is-selected" type="button" data-roulette-bet="red" aria-pressed="true">RED <small>×2</small></button>
+              <button class="black-bet" type="button" data-roulette-bet="black">BLACK <small>×2</small></button>
+              <button type="button" data-roulette-bet="odd">ODD <small>×2</small></button>
+              <button type="button" data-roulette-bet="even">EVEN <small>×2</small></button>
+              <button type="button" data-roulette-bet="low">1–18 <small>×2</small></button>
+              <button type="button" data-roulette-bet="high">19–36 <small>×2</small></button>
+              <button class="number-bet" type="button" data-roulette-bet="number">NUMBER <small>×36</small></button>
+            </div>
+            <label class="number-picker" id="roulette-number-wrap" hidden>
+              <span>NUMBER</span>
+              <select id="roulette-number" aria-label="賭ける数字"></select>
+            </label>
+            <div class="panel-label panel-label-spaced"><span>CHIP</span><strong><span id="roulette-stake-display">25</span> CR</strong></div>
+            <div class="bet-options" role="group" aria-label="ルーレットの賭け金">
+              <button type="button" data-roulette-stake="10">10</button>
+              <button class="is-selected" type="button" data-roulette-stake="25" aria-pressed="true">25</button>
+              <button type="button" data-roulette-stake="50">50</button>
+              <button type="button" data-roulette-stake="100">100</button>
+            </div>
+            <button class="action-button action-gold" id="roulette-spin" type="button">
+              <span>SPIN WHEEL</span><small>ホイールを回す</small>
+            </button>
+          </aside>
+        </div>
+      </section>
+
+      <section class="screen game-screen" id="screen-blackjack" data-screen="blackjack" hidden>
+        <header class="game-heading">
+          <button class="back-button" type="button" data-open-game="lobby"><span aria-hidden="true">←</span> FLOOR</button>
+          <div>
+            <span class="game-kicker">LAS VEGAS / TABLE GAME 03</span>
+            <h1 tabindex="-1">BLACK <em>21</em></h1>
+          </div>
+          <button class="rules-button" type="button" data-open-rules="blackjack">遊び方 <span aria-hidden="true">?</span></button>
+        </header>
+
+        <div class="game-layout blackjack-layout">
+          <div class="game-stage blackjack-stage">
+            <div class="table-mark" aria-hidden="true"><span>BLACK</span><b>21</b><span>PAYS 3 TO 2</span></div>
+            <div class="hand dealer-hand">
+              <div class="hand-label"><span>DEALER</span><strong id="dealer-score">—</strong></div>
+              <div class="cards" id="dealer-cards" aria-label="ディーラーのカード"></div>
+            </div>
+            <div class="table-message" id="blackjack-message" aria-live="polite">賭け金を選んで、DEALを押してください。</div>
+            <div class="hand player-hand">
+              <div class="hand-label"><span>YOU</span><strong id="player-score">—</strong></div>
+              <div class="cards" id="player-cards" aria-label="あなたのカード"></div>
+            </div>
+          </div>
+
+          <aside class="control-panel blackjack-controls">
+            <div class="panel-label"><span>BET</span><strong><span id="blackjack-bet-display">50</span> CR</strong></div>
+            <div class="bet-options" role="group" aria-label="ブラックジャックの賭け金">
+              <button type="button" data-blackjack-bet="10">10</button>
+              <button type="button" data-blackjack-bet="25">25</button>
+              <button class="is-selected" type="button" data-blackjack-bet="50" aria-pressed="true">50</button>
+              <button type="button" data-blackjack-bet="100">100</button>
+            </div>
+            <button class="action-button action-ivory" id="blackjack-deal" type="button">
+              <span>DEAL</span><small>カードを配る</small>
+            </button>
+            <div class="blackjack-actions" aria-label="プレイヤー操作">
+              <button id="blackjack-hit" type="button" disabled>HIT <small>引く</small></button>
+              <button id="blackjack-stand" type="button" disabled>STAND <small>止める</small></button>
+              <button id="blackjack-double" type="button" disabled>DOUBLE <small>倍賭け</small></button>
+            </div>
+            <div class="table-rules-mini">
+              <span>DEALER STANDS ON 17</span>
+              <span>BLACKJACK PAYS 3:2</span>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <section class="screen game-screen" id="screen-pachinko" data-screen="pachinko" hidden>
+        <header class="game-heading">
+          <button class="back-button" type="button" data-open-game="lobby"><span aria-hidden="true">←</span> FLOOR</button>
+          <div>
+            <span class="game-kicker">JAPAN / SMART PACHINKO 04</span>
+            <h1 tabindex="-1">SAKURA <em>∞</em></h1>
+          </div>
+          <button class="rules-button" type="button" data-open-rules="pachinko">遊び方 <span aria-hidden="true">?</span></button>
+        </header>
+
+        <div class="game-layout pachinko-layout">
+          <div class="game-stage pachinko-stage">
+            <div class="pachinko-board" id="pachinko-board" aria-label="パチンコ盤面">
+              <div class="pachinko-title" aria-hidden="true"><span>S A K U R A</span><strong>∞</strong></div>
+              <div class="pins" id="pachinko-pins" aria-hidden="true"></div>
+              <div class="pachinko-ball" id="pachinko-ball" aria-hidden="true"></div>
+              <div class="pockets" aria-hidden="true">
+                <span data-multiplier="0">MISS</span>
+                <span data-multiplier="1">×1</span>
+                <span data-multiplier="2">×2</span>
+                <span class="fever-pocket" data-multiplier="8">FEVER<br>×8</span>
+                <span data-multiplier="2">×2</span>
+                <span data-multiplier="1">×1</span>
+                <span data-multiplier="0">MISS</span>
+              </div>
+            </div>
+            <div class="machine-message" id="pachinko-message" aria-live="polite">玉数を選んで、SHOOTを押してください。</div>
+          </div>
+
+          <aside class="control-panel">
+            <div class="panel-label"><span>BALL VALUE</span><strong><span id="pachinko-bet-display">25</span> CR</strong></div>
+            <div class="bet-options" role="group" aria-label="パチンコの玉数">
+              <button type="button" data-pachinko-bet="10">10</button>
+              <button class="is-selected" type="button" data-pachinko-bet="25" aria-pressed="true">25</button>
+              <button type="button" data-pachinko-bet="50">50</button>
+              <button type="button" data-pachinko-bet="100">100</button>
+            </div>
+            <button class="action-button action-pink" id="pachinko-shoot" type="button">
+              <span>SHOOT</span><small>玉を打ち出す</small>
+            </button>
+            <div class="fever-meter-wrap">
+              <div class="panel-label"><span>FEVER CHANCE</span><strong id="fever-label">0 / 5</strong></div>
+              <div class="fever-meter" role="progressbar" aria-label="フィーバーチャンス" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><span id="fever-fill"></span></div>
+              <p>当たりポケットに入るとゲージUP。満タンで次のFEVER率が上昇。</p>
+            </div>
+          </aside>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="footer-brand">MIDNIGHT ARCADE <span>— PLAY FOR FUN</span></div>
+      <p>18歳以上を想定した架空の無料ゲームです。現金・景品への交換や課金機能はありません。</p>
+      <button type="button" id="reset-progress">進行状況をリセット</button>
+    </footer>
+
+    <dialog class="rules-dialog" id="rules-dialog" aria-labelledby="rules-title">
+      <div class="dialog-topline"><span>GAME GUIDE</span><button type="button" id="rules-close" aria-label="閉じる">×</button></div>
+      <div id="rules-content"></div>
+    </dialog>
+
+    <div class="toast-region" id="toast-region" aria-live="polite" aria-atomic="true"></div>
+  </body>
+</html>
+

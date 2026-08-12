@@ -7,7 +7,7 @@
 - **HANABI 3** — 3リール＋個別STOPボタンの和風スロット
 - **ROUGE 37** — シングルゼロ方式のヨーロピアンルーレット
 - **BLACK 21** — HIT / STAND / DOUBLE対応のブラックジャック
-- **P SAKURA ∞** — 先バレ・4保留・SPリーチ・4R/10R大当たり・ST30回のRUSHを備えたデジタルパチンコ
+- **PACHINKO MULTIVERSE** — 桜幻想・サイバーパンク・宇宙メカ・ゴシックホラーの4機種。先バレ・4保留・SPリーチ・4R/10R大当たり・ST30回のRUSHを搭載
 
 ## Features
 

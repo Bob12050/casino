@@ -7,8 +7,8 @@
     <meta name="description" content="海外カジノと和風スロット、パチンコをひとつにした無料のブラウザゲーム集。">
     <title>MIDNIGHT ARCADE — Casino & Pachinko</title>
     <link rel="icon" href="favicon.svg" type="image/svg+xml">
-    <link rel="stylesheet" href="style.css?v=20260812b">
-    <script src="app.js?v=20260812b" defer></script>
+    <link rel="stylesheet" href="style.css?v=20260812c">
+    <script src="app.js?v=20260812c" defer></script>
   </head>
   <body>
     <a class="skip-link" href="#main-content">ゲームへ移動</a>
@@ -162,9 +162,9 @@
                 <span class="art-index">04</span>
               </div>
               <div class="card-body">
-                <div class="game-meta"><span>SMART PACHINKO</span><span>1 PLAYER</span></div>
-                <h3>SAKURA <i>∞</i></h3>
-                <p>先バレ、保留、激アツリーチ。桜図柄をそろえてRUSHを掴め。</p>
+                <div class="game-meta"><span>PACHINKO MULTIVERSE</span><span>4 MACHINES</span></div>
+                <h3>MULTI <i>P</i></h3>
+                <p>桜、電脳、宇宙メカ、ゴシック。世界観の違う4機種で先バレとRUSHを楽しめ。</p>
                 <button class="card-play" type="button" data-open-game="pachinko">PLAY NOW <span aria-hidden="true">↗</span></button>
               </div>
             </article>
@@ -338,19 +338,41 @@
         </div>
       </section>
 
-      <section class="screen game-screen" id="screen-pachinko" data-screen="pachinko" hidden>
+      <section class="screen game-screen" id="screen-pachinko" data-screen="pachinko" data-pachi-theme="sakura" hidden>
         <header class="game-heading">
           <button class="back-button" type="button" data-open-game="lobby"><span aria-hidden="true">←</span> FLOOR</button>
           <div>
-            <span class="game-kicker">JAPAN / DIGITAL PACHINKO 04</span>
-            <h1 tabindex="-1">P SAKURA <em>∞</em></h1>
+            <span class="game-kicker" id="pachi-game-kicker">PACHINKO MULTIVERSE / MACHINE 01</span>
+            <h1 class="pachi-page-title" id="pachi-game-title" tabindex="-1">P SAKURA ∞</h1>
           </div>
           <button class="rules-button" type="button" data-open-rules="pachinko">遊び方 <span aria-hidden="true">?</span></button>
         </header>
 
+        <section class="pachi-theme-deck" aria-labelledby="pachi-theme-heading">
+          <div class="pachi-theme-copy">
+            <span>SELECT MACHINE</span>
+            <strong id="pachi-theme-heading">世界観を選ぶ</strong>
+            <small id="pachi-theme-lock-note">遊技中・AUTO中・RUSH中は機種を変更できません。</small>
+          </div>
+          <div class="pachi-theme-selector" role="group" aria-label="パチンコ機種を選択" aria-describedby="pachi-theme-lock-note">
+            <button class="is-selected" type="button" data-pachi-theme="sakura" aria-pressed="true">
+              <span>01 / DREAM</span><strong>SAKURA ∞</strong><small>桜幻想</small>
+            </button>
+            <button type="button" data-pachi-theme="cyber" aria-pressed="false">
+              <span>02 / CYBER</span><strong>NEON//BREACH</strong><small>電脳侵入</small>
+            </button>
+            <button type="button" data-pachi-theme="mecha" aria-pressed="false">
+              <span>03 / SPACE</span><strong>ASTRAL GEAR</strong><small>星間決戦</small>
+            </button>
+            <button type="button" data-pachi-theme="gothic" aria-pressed="false">
+              <span>04 / GOTHIC</span><strong>NOCTURNE</strong><small>血月古城</small>
+            </button>
+          </div>
+        </section>
+
         <div class="game-layout pachinko-layout">
           <div class="game-stage pachinko-stage">
-            <div class="pachi-machine" id="pachi-machine" data-phase="idle" data-mode="normal">
+            <div class="pachi-machine" id="pachi-machine" data-phase="idle" data-mode="normal" data-theme="sakura">
               <div class="pachi-top-lamp" id="pachi-alert-lamp" aria-hidden="true">
                 <span>S</span><span>A</span><span>K</span><span>U</span><span>R</span><span>A</span>
               </div>
@@ -373,9 +395,9 @@
                     <span class="pachi-st-counter" id="pachi-st-counter">大当り 1 / 39.9</span>
                   </div>
                   <div class="pachi-scene-title" aria-hidden="true">
-                    <small>MIDNIGHT BLOOM</small>
-                    <strong>桜</strong>
-                    <span>INFINITY</span>
+                    <small id="pachi-scene-kicker">MIDNIGHT BLOOM</small>
+                    <strong id="pachi-scene-hero">桜</strong>
+                    <span id="pachi-scene-footer">INFINITY</span>
                   </div>
                   <div class="pachi-effect-copy" id="pachi-effect-copy" aria-hidden="true"></div>
                   <div class="pachi-symbols" aria-label="液晶図柄">
@@ -393,7 +415,7 @@
                     <small id="pachi-jackpot-pay">+0 CR</small>
                   </div>
                   <div class="pachi-rush-overlay" id="pachi-rush-overlay" hidden aria-hidden="true">
-                    <span>突入</span><strong>宵桜 RUSH</strong><small>ST 30</small>
+                    <span id="pachi-rush-kicker">突入</span><strong id="pachi-rush-name">宵桜 RUSH</strong><small id="pachi-rush-count">ST 30</small>
                   </div>
                   <div class="pachi-prealert-copy" id="pachi-prealert-copy" hidden aria-hidden="true">先バレ</div>
                 </div>
@@ -444,14 +466,14 @@
             <div class="pachi-custom">
               <div class="panel-label"><span>演出カスタム</span><small>CUSTOM</small></div>
               <button class="pachi-setting" id="pachi-prealert-toggle" type="button" aria-pressed="true">
-                <span><b>先バレ</b><small id="pachi-prealert-trust">期待度 約40%</small></span>
+                <span><b id="pachi-prealert-name">緋桜フラッシュ</b><small id="pachi-prealert-trust">期待度 約40%</small></span>
                 <strong>ON</strong>
               </button>
               <button class="pachi-setting" id="pachi-speed-toggle" type="button" aria-pressed="false">
                 <span><b>演出速度</b><small>変動時間を切り替え</small></span>
                 <strong>標準</strong>
               </button>
-              <button class="pachi-preview" id="pachi-prealert-preview" type="button">先バレを試聴 <span aria-hidden="true">▶</span></button>
+              <button class="pachi-preview" id="pachi-prealert-preview" type="button"><span id="pachi-preview-label">緋桜フラッシュを試聴</span> <span aria-hidden="true">▶</span></button>
             </div>
 
             <div class="pachi-session-stats">

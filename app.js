@@ -6,6 +6,9 @@
   const STORAGE_KEY = "midnight-arcade-state-v1";
   const MAX_CREDIT = 9999999;
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+  const PACHI_THEME_KEYS = Object.freeze(["sakura", "cyber", "mecha", "gothic"]);
+  const DEFAULT_PACHI_THEME = "sakura";
+  const normalizePachiTheme = (value, fallback = DEFAULT_PACHI_THEME) => PACHI_THEME_KEYS.includes(value) ? value : fallback;
 
   const defaultState = () => ({
     balance: 2500,
@@ -13,6 +16,7 @@
     bestWin: 0,
     sound: false,
     fever: 0,
+    pachiTheme: DEFAULT_PACHI_THEME,
     pachiPrealert: true,
     pachiFast: false,
     pachiRush: 0,
@@ -32,12 +36,14 @@
     try {
       const saved = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
       if (!saved || typeof saved !== "object") return fallback;
+      const savedPachiTheme = normalizePachiTheme(saved.pachiTheme);
       return {
         balance: safeInteger(saved.balance, fallback.balance),
         totalPlays: safeInteger(saved.totalPlays, 0, 0, 10000000),
         bestWin: safeInteger(saved.bestWin, 0),
         sound: saved.sound === true,
         fever: safeInteger(saved.fever, 0, 0, 5),
+        pachiTheme: savedPachiTheme,
         pachiPrealert: saved.pachiPrealert !== false,
         pachiFast: saved.pachiFast === true,
         pachiRush: safeInteger(saved.pachiRush, 0, 0, 30),
@@ -48,6 +54,7 @@
             .slice(0, 5)
             .map((item) => ({
               id: item.id.slice(0, 80),
+              theme: normalizePachiTheme(item.theme, savedPachiTheme),
               bet: [10, 25, 50, 100].includes(item.bet) ? item.bet : 10,
               mode: item.mode === "rush" ? "rush" : "normal",
               hit: item.hit === true,
@@ -299,7 +306,7 @@
     slots: "HANABI 3 — MIDNIGHT ARCADE",
     roulette: "ROUGE 37 — MIDNIGHT ARCADE",
     blackjack: "BLACK 21 — MIDNIGHT ARCADE",
-    pachinko: "P SAKURA ∞ — MIDNIGHT ARCADE"
+    pachinko: "PACHINKO MULTIVERSE — MIDNIGHT ARCADE"
   };
 
   function showScreen(requested, writeHash = true) {
@@ -315,7 +322,7 @@
       if (active) button.setAttribute("aria-current", "page");
       else button.removeAttribute("aria-current");
     });
-    document.title = titles[name];
+    document.title = name === "pachinko" ? `${getPachiTheme().name} — MIDNIGHT ARCADE` : titles[name];
     if (writeHash && location.hash !== `#${name}`) history.pushState({ screen: name }, "", `#${name}`);
     window.scrollTo({ top: 0, behavior: reducedMotion.matches ? "auto" : "smooth" });
     if (name !== "lobby") {
@@ -378,9 +385,10 @@
       ]
     },
     pachinko: {
-      title: "P SAKURA ∞",
-      intro: "先バレ、保留、リーチ、大当たり、ST型RUSHを備えたオリジナルのデジタルパチンコです。",
+      title: "PACHINKO MULTIVERSE",
+      intro: "4つの世界観から機種を選び、先バレ、保留、リーチ、大当たり、ST型RUSHを楽しめるデジタルパチンコです。",
       items: [
+        "桜幻想、電脳侵入、宇宙メカ、ゴシックホラーの4機種から選べます。抽選確率と配当は全機種共通です。",
         "レートを選び、<strong>SHOOT</strong>で玉を打ち出します。START入賞率は45%、保留は最大4個です。",
         "通常時の大当たりはSTART入賞ごとに<strong>約1/39.9</strong>。先バレON時は入賞した瞬間にランプと音で期待度約40%を告知します。",
         "桜舞SP、夜桜SP、金襖、全回転などへ発展。大当たりは<strong>4Rまたは10R</strong>です。",
@@ -393,7 +401,7 @@
   const rulesDialog = $("#rules-dialog");
   $$('[data-open-rules]').forEach((button) => {
     button.addEventListener("click", () => {
-      const guide = guides[button.dataset.openRules] || guides.lobby;
+      const guide = button.dataset.openRules === "pachinko" ? getPachinkoGuide() : guides[button.dataset.openRules] || guides.lobby;
       $("#rules-content").innerHTML = `
         <h2 id="rules-title">${guide.title}</h2>
         <p>${guide.intro}</p>
@@ -894,7 +902,147 @@
     }
   });
 
-  /* P SAKURA infinity — reserve queue, pre-alert, reach and ST RUSH */
+  /* PACHINKO MULTIVERSE — one stable engine, four presentation themes */
+  const PACHI_THEMES = Object.freeze({
+    sakura: {
+      name: "P SAKURA ∞",
+      heading: "P SAKURA ∞",
+      kicker: "PACHINKO MULTIVERSE / MACHINE 01",
+      marquee: "SAKURA",
+      boardLabel: "P SAKURA∞ 桜幻想パチンコ盤面",
+      intro: "満開の桜を駆け抜け、夜桜の向こうに大当たりを咲かせる。",
+      scene: ["MIDNIGHT BLOOM", "桜", "INFINITY"],
+      symbols: ["一", "二", "三", "四", "五", "六", "七", "八", "九"],
+      effects: {
+        instant: "",
+        normal: "ノーマルリーチ",
+        sakura: "桜舞SP",
+        yozakura: "夜桜幻舞SP",
+        gold: "金襖・決戦予告",
+        rainbow: "天桜全回転"
+      },
+      normalBadge: "通常時",
+      normalLabel: "NORMAL MODE",
+      prealertName: "緋桜フラッシュ",
+      prealertCopy: "先バレ",
+      rushName: "宵桜 RUSH",
+      rushLabel: "YOZAKURA RUSH",
+      rushKicker: "突入",
+      rushEndTitle: "通常時へ",
+      rushEndCopy: "また桜を咲かせよう",
+      jackpot4: "大当り",
+      jackpot10: "超大当り"
+    },
+    cyber: {
+      name: "P NEON//BREACH",
+      heading: "P NEON//BREACH",
+      kicker: "PACHINKO MULTIVERSE / MACHINE 02",
+      marquee: "BREACH",
+      boardLabel: "P NEON BREACH 電脳都市パチンコ盤面",
+      intro: "暴走都市AIへ侵入し、最深部のジャックポットコードを奪取せよ。",
+      scene: ["CITY NODE 09", "侵", "ROOT ACCESS"],
+      symbols: ["01", "02", "03", "04", "05", "06", "07", "08", "09"],
+      effects: {
+        instant: "",
+        normal: "TARGET LOCK",
+        sakura: "TRACE RUN SP",
+        yozakura: "FIREWALL BREAK SP",
+        gold: "ROOT ACCESS・GOLD",
+        rainbow: "SYSTEM OVERRIDE 全回転"
+      },
+      normalBadge: "NODE SCAN",
+      normalLabel: "INTRUSION MODE",
+      prealertName: "CODE RED",
+      prealertCopy: "CODE RED",
+      rushName: "OVERDRIVE RUSH",
+      rushLabel: "OVERDRIVE RUSH",
+      rushKicker: "ACCESS",
+      rushEndTitle: "SYSTEM RESET",
+      rushEndCopy: "RECONNECT TO THE GRID",
+      jackpot4: "ACCESS GRANTED",
+      jackpot10: "ROOT JACKPOT"
+    },
+    mecha: {
+      name: "P ASTRAL GEAR ZERO",
+      heading: "P ASTRAL GEAR ZERO",
+      kicker: "PACHINKO MULTIVERSE / MACHINE 03",
+      marquee: "ASTRAL",
+      boardLabel: "P ASTRAL GEAR ZERO 星間機甲パチンコ盤面",
+      intro: "最終機アストラルギアを起動し、星間艦隊との決戦へ出撃する。",
+      scene: ["ORBITAL COMMAND", "零", "GEAR ONLINE"],
+      symbols: ["G1", "G2", "G3", "G4", "G5", "G6", "G7", "G8", "G9"],
+      effects: {
+        instant: "",
+        normal: "敵影捕捉",
+        sakura: "BOOST CHASE SP",
+        yozakura: "FLEET BREAK SP",
+        gold: "FINAL ARMAMENT",
+        rainbow: "ASTRAL COMBINE 全回転"
+      },
+      normalBadge: "STANDBY",
+      normalLabel: "SORTIE MODE",
+      prealertName: "SCRAMBLE BEACON",
+      prealertCopy: "SCRAMBLE",
+      rushName: "ASTRAL DRIVE",
+      rushLabel: "ASTRAL DRIVE",
+      rushKicker: "IGNITION",
+      rushEndTitle: "RETURN BASE",
+      rushEndCopy: "NEXT SORTIE AWAITS",
+      jackpot4: "MISSION CLEAR",
+      jackpot10: "ULTIMATE DRIVE"
+    },
+    gothic: {
+      name: "P NOCTURNE: BLOOD OATH",
+      heading: "P NOCTURNE: BLOOD OATH",
+      kicker: "PACHINKO MULTIVERSE / MACHINE 04",
+      marquee: "NOCTURNE",
+      boardLabel: "P NOCTURNE BLOOD OATH 血月古城パチンコ盤面",
+      intro: "血月が昇る古城で、封印された夜の契約を完成させる。",
+      scene: ["BLOOD MOON", "†", "OATH AWAITS"],
+      symbols: ["I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX"],
+      effects: {
+        instant: "",
+        normal: "霧中遭遇",
+        sakura: "BLACK ROSE SP",
+        yozakura: "ECLIPSE CASTLE SP",
+        gold: "GOLDEN COFFIN",
+        rainbow: "BLOOD MOON 全回転"
+      },
+      normalBadge: "NIGHT WATCH",
+      normalLabel: "OATH MODE",
+      prealertName: "BLOOD BELL",
+      prealertCopy: "BLOOD BELL",
+      rushName: "CRIMSON RITUAL",
+      rushLabel: "CRIMSON RITUAL",
+      rushKicker: "AWAKEN",
+      rushEndTitle: "DAWN RETURNS",
+      rushEndCopy: "THE OATH REMAINS",
+      jackpot4: "契約成立",
+      jackpot10: "BLOOD OATH"
+    }
+  });
+
+  function getPachiTheme(themeKey = state.pachiTheme) {
+    return PACHI_THEMES[normalizePachiTheme(themeKey)] || PACHI_THEMES[DEFAULT_PACHI_THEME];
+  }
+
+  function getPachinkoGuide() {
+    const theme = getPachiTheme();
+    const effectNames = [theme.effects.sakura, theme.effects.yozakura, theme.effects.gold, theme.effects.rainbow].join("、");
+    return {
+      title: theme.name,
+      intro: theme.intro,
+      items: [
+        "画面上部から4つの機種を選べます。抽選確率・配当・保留・RUSH仕様は全機種共通です。",
+        "レートを選び、<strong>SHOOT</strong>で玉を打ち出します。START入賞率は45%、保留は最大4個です。",
+        `通常時の大当たりはSTART入賞ごとに<strong>約1/39.9</strong>。<strong>${theme.prealertName}</strong>は期待度約40%です。`,
+        `${effectNames}へ発展。大当たりは<strong>4Rまたは10R</strong>です。`,
+        `初当たりの55%で<strong>${theme.rushName}</strong>へ。30回転のST中は約1/24.9、先バレ期待度は約70%です。`,
+        "機種変更は通常時・保留なし・AUTO停止中のみ可能です。変更しても抽選確率には影響しません。"
+      ]
+    };
+  }
+
   const PACHI_CONFIG = Object.freeze({
     startChance: 4500,
     normalHitChance: 251,
@@ -907,7 +1055,6 @@
     prealertNormalMissChance: 310,
     prealertRushMissChance: 140
   });
-  const PACHI_DIGITS = ["一", "二", "三", "四", "五", "六", "七", "八", "九"];
   const PACHI_EFFECTS = Object.freeze({
     instant: { label: "", rank: 0 },
     normal: { label: "ノーマルリーチ", rank: 1 },
@@ -926,6 +1073,7 @@
   let pachiAuto = false;
   let pachiAutoTimer = 0;
   let pachiAlertTicket = 0;
+  let pachiAlertActive = false;
 
   function pachiDelay(milliseconds) {
     const duration = reducedMotion.matches ? Math.min(milliseconds, 28) : state.pachiFast ? milliseconds * 0.48 : milliseconds;
@@ -945,6 +1093,65 @@
   function pachiCapacityUsed() {
     const currentOutsideQueue = pachiCurrent && !pachiQueue().some((item) => item.id === pachiCurrent.id) ? 1 : 0;
     return pachiQueue().length + currentOutsideQueue;
+  }
+
+  function isPachiThemeLocked() {
+    return pachiCapacityUsed() > 0
+      || pachiLaunchLocked
+      || pachiProcessing
+      || Boolean(pachiCurrent)
+      || pachiAuto
+      || pachiAlertActive
+      || state.pachiRush > 0;
+  }
+
+  function applyPachiTheme(themeKey, { persist = false, announce = false } = {}) {
+    const resolvedKey = normalizePachiTheme(themeKey);
+    const theme = getPachiTheme(resolvedKey);
+    if (persist) state.pachiTheme = resolvedKey;
+    const screen = $("#screen-pachinko");
+    const machine = $("#pachi-machine");
+    screen.dataset.pachiTheme = resolvedKey;
+    machine.dataset.theme = resolvedKey;
+    $("#pachi-game-kicker").textContent = theme.kicker;
+    $("#pachi-game-title").textContent = theme.heading;
+    $("#pachinko-board").setAttribute("aria-label", theme.boardLabel);
+    $("#pachi-alert-lamp").replaceChildren(...[...theme.marquee].map((letter) => {
+      const span = document.createElement("span");
+      span.textContent = letter;
+      return span;
+    }));
+    $("#pachi-scene-kicker").textContent = theme.scene[0];
+    $("#pachi-scene-hero").textContent = theme.scene[1];
+    $("#pachi-scene-footer").textContent = theme.scene[2];
+    $("#pachi-prealert-name").textContent = theme.prealertName;
+    $("#pachi-preview-label").textContent = `${theme.prealertName}を試聴`;
+    $("#pachi-prealert-copy").textContent = theme.prealertCopy;
+    $$("button[data-pachi-theme]").forEach((button) => {
+      const selected = button.dataset.pachiTheme === resolvedKey;
+      button.classList.toggle("is-selected", selected);
+      button.setAttribute("aria-pressed", String(selected));
+    });
+    if (!pachiCurrent) setPachiSymbols([3, 7, 5], resolvedKey);
+    if (location.hash === "#pachinko") document.title = `${theme.name} — MIDNIGHT ARCADE`;
+    if (persist) saveState();
+    if (announce) {
+      setMessage($("#pachinko-message"), `${theme.name}へ移動しました。${theme.intro}`);
+      showToast(`${theme.name}を選択しました。`);
+      sound.play("select");
+    }
+  }
+
+  function selectPachiTheme(themeKey) {
+    const resolvedKey = normalizePachiTheme(themeKey);
+    if (resolvedKey === state.pachiTheme) return;
+    if (isPachiThemeLocked()) {
+      showToast("遊技中・AUTO中・RUSH中は機種を変更できません。", true);
+      return;
+    }
+    applyPachiTheme(resolvedKey, { persist: true, announce: true });
+    renderPachiHUD();
+    updatePachiControls();
   }
 
   function buildPachinkoPins() {
@@ -995,7 +1202,7 @@
     return [left, center, right];
   }
 
-  function drawPachiOutcome(bet, mode) {
+  function drawPachiOutcome(bet, mode, themeKey = state.pachiTheme) {
     const hitChance = mode === "rush" ? PACHI_CONFIG.rushHitChance : PACHI_CONFIG.normalHitChance;
     const hit = randomInt(10000) < hitChance;
     const rounds = hit
@@ -1009,6 +1216,7 @@
     const effect = choosePachiEffect(hit, mode);
     return {
       id: `pachi-${Date.now()}-${randomInt(1000000)}`,
+      theme: normalizePachiTheme(themeKey),
       bet,
       mode,
       hit,
@@ -1023,10 +1231,11 @@
     };
   }
 
-  function setPachiSymbols(digits) {
+  function setPachiSymbols(digits, themeKey = pachiCurrent?.theme || state.pachiTheme) {
+    const symbols = getPachiTheme(themeKey).symbols;
     [$("#pachi-symbol-left"), $("#pachi-symbol-center"), $("#pachi-symbol-right")].forEach((element, index) => {
       const digit = digits[index];
-      element.textContent = PACHI_DIGITS[digit - 1];
+      element.textContent = symbols[digit - 1];
       element.dataset.digit = String(digit);
     });
   }
@@ -1055,13 +1264,14 @@
 
   function renderPachiHUD() {
     const rushMode = pachiCurrent ? pachiCurrent.mode === "rush" : state.pachiRush > 0;
+    const theme = getPachiTheme(pachiCurrent?.theme || state.pachiTheme);
     const machine = $("#pachi-machine");
     const statusCard = $(".pachi-status-card");
     machine.dataset.mode = rushMode ? "rush" : "normal";
     statusCard.dataset.mode = rushMode ? "rush" : "normal";
-    $("#pachi-mode-badge").textContent = rushMode ? "宵桜 RUSH" : "通常時";
+    $("#pachi-mode-badge").textContent = rushMode ? theme.rushName : theme.normalBadge;
     $("#pachi-st-counter").textContent = rushMode ? `ST 残り ${state.pachiRush}` : "大当り 1 / 39.9";
-    $("#pachi-status-label").textContent = rushMode ? "YOZAKURA RUSH" : "NORMAL MODE";
+    $("#pachi-status-label").textContent = rushMode ? theme.rushLabel : theme.normalLabel;
     $("#pachi-status-value").textContent = rushMode ? `ST ${state.pachiRush} / 30` : "1 / 39.9";
     $("#pachi-status-note").textContent = rushMode ? "大当り 約1 / 24.9" : "START入賞時";
     $("#pachi-st-fill").style.width = `${(state.pachiRush / PACHI_CONFIG.rushSpins) * 100}%`;
@@ -1092,12 +1302,22 @@
     pachinkoBetButtons.forEach((button) => {
       button.disabled = pachiCapacityUsed() > 0;
     });
+    const themeLocked = isPachiThemeLocked();
+    $$("button[data-pachi-theme]").forEach((button) => {
+      button.disabled = themeLocked;
+      button.title = themeLocked ? "遊技中は機種を変更できません" : "";
+    });
+    $("#pachi-theme-lock-note").textContent = themeLocked
+      ? "現在遊技中です。保留消化・AUTO停止・RUSH終了後に変更できます。"
+      : "通常時・保留なしで機種を変更できます。抽選確率は全機種共通です。";
     renderPachiHUD();
   }
 
   async function triggerPachiPrealert(item = null, preview = false) {
     if (!preview && !state.pachiPrealert) return;
     const ticket = ++pachiAlertTicket;
+    pachiAlertActive = true;
+    updatePachiControls();
     const machine = $("#pachi-machine");
     machine.classList.add("is-prealert");
     $("#pachi-prealert-copy").hidden = false;
@@ -1113,6 +1333,8 @@
     if (ticket === pachiAlertTicket) {
       machine.classList.remove("is-prealert");
       $("#pachi-prealert-copy").hidden = true;
+      pachiAlertActive = false;
+      updatePachiControls();
     }
   }
 
@@ -1182,36 +1404,38 @@
     });
   }
 
-  async function cyclePachiSymbols(epoch, effect) {
+  async function cyclePachiSymbols(epoch, effect, themeKey) {
     const cycles = reducedMotion.matches ? 1 : state.pachiFast ? 4 : 8;
     setPachiPhase("spin", effect);
     for (let index = 0; index < cycles; index += 1) {
-      setPachiSymbols([randomInt(9) + 1, randomInt(9) + 1, randomInt(9) + 1]);
+      setPachiSymbols([randomInt(9) + 1, randomInt(9) + 1, randomInt(9) + 1], themeKey);
       if (!await waitPachi(125, epoch)) return false;
     }
     return true;
   }
 
-  async function showPachiRushEntry(epoch) {
+  async function showPachiRushEntry(epoch, themeKey) {
+    const theme = getPachiTheme(themeKey);
     const overlay = $("#pachi-rush-overlay");
     const [kicker, title, count] = overlay.children;
-    kicker.textContent = "突入";
-    title.textContent = "宵桜 RUSH";
+    kicker.textContent = theme.rushKicker;
+    title.textContent = theme.rushName;
     count.textContent = "ST 30";
     overlay.hidden = false;
     $("#pachi-machine").dataset.mode = "rush";
     sound.play("rush");
-    setMessage($("#pachinko-message"), "宵桜RUSH突入 — ST30回転、右打ち！", true);
+    setMessage($("#pachinko-message"), `${theme.rushName}突入 — ST30回転、右打ち！`, true);
     await waitPachi(1250, epoch);
     overlay.hidden = true;
   }
 
-  async function showPachiRushEnd(epoch) {
+  async function showPachiRushEnd(epoch, themeKey) {
+    const theme = getPachiTheme(themeKey);
     const overlay = $("#pachi-rush-overlay");
     const [kicker, title, count] = overlay.children;
     kicker.textContent = "ST終了";
-    title.textContent = "通常時へ";
-    count.textContent = "また桜を咲かせよう";
+    title.textContent = theme.rushEndTitle;
+    count.textContent = theme.rushEndCopy;
     overlay.hidden = false;
     sound.play("lose");
     setMessage($("#pachinko-message"), "RUSH終了 — 通常時へ戻ります。 ");
@@ -1220,7 +1444,10 @@
   }
 
   async function playPachiItem(item, epoch) {
-    const effect = PACHI_EFFECTS[item.effect] || PACHI_EFFECTS.instant;
+    const themeKey = normalizePachiTheme(item.theme, state.pachiTheme);
+    const theme = getPachiTheme(themeKey);
+    const effectMeta = PACHI_EFFECTS[item.effect] || PACHI_EFFECTS.instant;
+    const effect = { ...effectMeta, label: theme.effects[item.effect] || "" };
     const message = $("#pachinko-message");
     const effectCopy = $("#pachi-effect-copy");
     const reachBanner = $("#pachi-reach-banner");
@@ -1246,9 +1473,9 @@
     effectCopy.textContent = effect.label;
     setMessage(message, item.mode === "rush" ? `RUSH変動 — 残り${state.pachiRush}回` : "図柄変動開始…");
 
-    if (!await cyclePachiSymbols(epoch, item.effect)) return;
+    if (!await cyclePachiSymbols(epoch, item.effect, themeKey)) return;
     if (effect.rank === 0) {
-      setPachiSymbols(item.digits);
+      setPachiSymbols(item.digits, themeKey);
       setPachiPhase("miss", item.effect);
       const result = settlePachiItem(item, 0);
       if (!result) return;
@@ -1257,18 +1484,18 @@
         : "ハズレ — 次のSTARTを狙おう。 ");
       await waitPachi(420, epoch);
       if (item.mode === "rush" && state.pachiRush === 0 && !pachiQueue().some((queued) => queued.mode === "rush")) {
-        await showPachiRushEnd(epoch);
+        await showPachiRushEnd(epoch, themeKey);
       }
       return;
     }
 
     const reachDigit = item.digits[0];
     const missCenter = item.hit ? (reachDigit === 9 ? 8 : reachDigit + 1) : item.digits[1];
-    setPachiSymbols([reachDigit, missCenter, reachDigit]);
+    setPachiSymbols([reachDigit, missCenter, reachDigit], themeKey);
     setPachiPhase("reach", item.effect);
     reachBanner.textContent = effect.label;
     sound.play("reach");
-    setMessage(message, `${effect.label} — ${PACHI_DIGITS[reachDigit - 1]}図柄テンパイ！`, effect.rank >= 3);
+    setMessage(message, `${effect.label} — ${theme.symbols[reachDigit - 1]}図柄テンパイ！`, effect.rank >= 3);
     if (!await waitPachi(600 + effect.rank * 170, epoch)) return;
 
     if (effect.rank >= 2 || item.hit) {
@@ -1281,7 +1508,7 @@
     if (!await waitPachi(320, epoch)) return;
 
     if (!item.hit) {
-      setPachiSymbols(item.digits);
+      setPachiSymbols(item.digits, themeKey);
       setPachiPhase("miss", item.effect);
       const result = settlePachiItem(item, 0);
       if (!result) return;
@@ -1289,27 +1516,27 @@
       sound.play("lose");
       await waitPachi(650, epoch);
       if (item.mode === "rush" && state.pachiRush === 0 && !pachiQueue().some((queued) => queued.mode === "rush")) {
-        await showPachiRushEnd(epoch);
+        await showPachiRushEnd(epoch, themeKey);
       }
       return;
     }
 
-    setPachiSymbols(item.digits);
+    setPachiSymbols(item.digits, themeKey);
     setPachiPhase("jackpot", item.effect);
     const payout = item.bet * (item.rounds === 10 ? 50 : 16);
     const result = settlePachiItem(item, payout);
     if (!result) return;
     const jackpot = $("#pachi-jackpot");
-    $("#pachi-jackpot-kicker").textContent = item.rounds === 10 ? "超大当り" : "大当り";
+    $("#pachi-jackpot-kicker").textContent = item.rounds === 10 ? theme.jackpot10 : theme.jackpot4;
     $("#pachi-jackpot-rounds").textContent = `${item.rounds}R`;
     $("#pachi-jackpot-pay").textContent = `+${formatCredit(result.payout)} CR`;
     jackpot.hidden = false;
     sound.play(item.rounds === 10 ? "jackpot" : "win");
-    setMessage(message, `${PACHI_DIGITS[item.digits[0] - 1]}図柄揃い — ${item.rounds}R 大当たり！ +${formatCredit(result.payout)} CR`, true);
+    setMessage(message, `${theme.symbols[item.digits[0] - 1]}図柄揃い — ${item.rounds}R 大当たり！ +${formatCredit(result.payout)} CR`, true);
 
     if (!await waitPachi(item.rounds === 10 ? 1450 : 1050, epoch)) return;
     jackpot.hidden = true;
-    if (item.rushEntry) await showPachiRushEntry(epoch);
+    if (item.rushEntry) await showPachiRushEntry(epoch, themeKey);
   }
 
   async function processPachiQueue() {
@@ -1320,12 +1547,14 @@
       while (epoch === pachiSessionEpoch && pachiQueue().length > 0) {
         const item = pachiQueue()[0];
         pachiCurrent = item;
+        applyPachiTheme(item.theme, { persist: false });
         renderPachiHUD();
         const waitUntilReady = Math.max(0, safeInteger(item.readyAt, 0, 0, Number.MAX_SAFE_INTEGER) - Date.now());
         if (waitUntilReady > 0 && !await waitPachi(waitUntilReady, epoch)) break;
         await playPachiItem(item, epoch);
         if (epoch !== pachiSessionEpoch) break;
         pachiCurrent = null;
+        applyPachiTheme(state.pachiTheme, { persist: false });
         setPachiPhase("idle");
         $("#pachi-effect-copy").textContent = "";
         $("#pachi-reach-banner").textContent = "";
@@ -1390,7 +1619,7 @@
     const epoch = pachiSessionEpoch;
     const startEntered = randomInt(10000) < PACHI_CONFIG.startChance;
     const mode = state.pachiRush > 0 ? "rush" : "normal";
-    const item = startEntered ? drawPachiOutcome(bet, mode) : null;
+    const item = startEntered ? drawPachiOutcome(bet, mode, state.pachiTheme) : null;
     const flightDuration = reducedMotion.matches ? 30 : state.pachiFast ? 460 : 820;
     if (item) {
       item.readyAt = Date.now() + flightDuration;
@@ -1448,6 +1677,7 @@
     pachiAuto = Boolean(enabled);
     window.clearTimeout(pachiAutoTimer);
     renderPachiHUD();
+    updatePachiControls();
     if (pachiAuto) {
       showToast("オート発射を開始しました。 ");
       schedulePachiAuto();
@@ -1455,6 +1685,9 @@
   }
 
   $("#pachinko-shoot").addEventListener("click", () => shootPachinko(false));
+  $$("button[data-pachi-theme]").forEach((button) => {
+    button.addEventListener("click", () => selectPachiTheme(button.dataset.pachiTheme));
+  });
   $("#pachi-auto-toggle").addEventListener("click", () => setPachiAuto(!pachiAuto));
   $("#pachi-prealert-toggle").addEventListener("click", () => {
     state.pachiPrealert = !state.pachiPrealert;
@@ -1478,6 +1711,7 @@
     pachiSessionEpoch += 1;
     pachiLaunchToken += 1;
     pachiAlertTicket += 1;
+    pachiAlertActive = false;
     pachiProcessing = false;
     pachiCurrent = null;
     pachiLaunchLocked = false;
@@ -1487,8 +1721,9 @@
     $("#pachi-prealert-copy").hidden = true;
     $("#pachi-machine").classList.remove("is-prealert");
     window.setTimeout(() => {
+      applyPachiTheme(state.pachiTheme, { persist: false });
       setPachiPhase("idle");
-      setPachiSymbols([3, 7, 5]);
+      setPachiSymbols([3, 7, 5], state.pachiTheme);
       renderPachiHUD();
       updatePachiControls();
     }, 0);
@@ -1499,7 +1734,8 @@
   renderRouletteHistory();
   updateBlackjackControls();
   updateDashboard();
-  setPachiSymbols([3, 7, 5]);
+  applyPachiTheme(pachiQueue()[0]?.theme || state.pachiTheme, { persist: false });
+  setPachiSymbols([3, 7, 5], pachiQueue()[0]?.theme || state.pachiTheme);
   renderPachiHUD();
   updatePachiControls();
   if (pachiQueue().length) processPachiQueue();

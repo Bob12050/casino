@@ -922,6 +922,7 @@
   let pachiProcessing = false;
   let pachiCurrent = null;
   let pachiLaunchLocked = false;
+  let pachiLaunchToken = 0;
   let pachiAuto = false;
   let pachiAutoTimer = 0;
   let pachiAlertTicket = 0;
@@ -1041,11 +1042,12 @@
     const waiting = pachiQueue().filter((item) => !pachiCurrent || item.id !== pachiCurrent.id).slice(0, PACHI_CONFIG.maxHolds);
     holds.forEach((hold, index) => {
       const item = waiting[index];
+      const visiblePrealert = item?.prealert && state.pachiPrealert;
       hold.className = item
-        ? `is-filled${item.prealert ? " is-hot" : ""}${PACHI_EFFECTS[item.effect]?.rank >= 4 ? " is-gold" : ""}`
+        ? `is-filled${visiblePrealert ? " is-hot" : ""}${PACHI_EFFECTS[item.effect]?.rank >= 4 ? " is-gold" : ""}`
         : "";
       hold.setAttribute("aria-label", item
-        ? `保留${index + 1} 入賞済み${item.prealert ? " 先バレ対象" : ""}`
+        ? `保留${index + 1} 入賞済み${visiblePrealert ? " 先バレ対象" : ""}`
         : `保留${index + 1} 空き`);
     });
     $("#pachi-hold-count").textContent = `${waiting.length} / ${PACHI_CONFIG.maxHolds}`;
@@ -1084,7 +1086,8 @@
     const queueLocked = pachiCapacityUsed() >= PACHI_CONFIG.maxPending;
     const insufficient = state.balance < pachinkoBet.value;
     const rushReserved = pachiQueue().filter((item) => item.mode === "rush" && !item.rushConsumed).length;
-    const noRushSpinsLeft = state.pachiRush > 0 && rushReserved >= state.pachiRush;
+    const rushResolutionPending = state.pachiRush === 0 && pachiQueue().some((item) => item.mode === "rush");
+    const noRushSpinsLeft = rushResolutionPending || (state.pachiRush > 0 && rushReserved >= state.pachiRush);
     $("#pachinko-shoot").disabled = pachiLaunchLocked || queueLocked || insufficient || noRushSpinsLeft;
     pachinkoBetButtons.forEach((button) => {
       button.disabled = pachiCapacityUsed() > 0;
@@ -1121,6 +1124,7 @@
     state.balance = Math.min(MAX_CREDIT, state.balance + safePayout);
     state.pachiTotalPay = Math.min(MAX_CREDIT, state.pachiTotalPay + safePayout);
     if (item.hit) state.pachiHitCount += 1;
+    if (item.rushEntry) state.pachiRush = PACHI_CONFIG.rushSpins;
     state.bestWin = Math.max(state.bestWin, Math.max(0, safePayout - item.bet));
     saveState();
     updateDashboard();
@@ -1133,6 +1137,10 @@
     if (index < 0) return;
     pachiQueue().splice(index, 1);
     state.balance = Math.min(MAX_CREDIT, state.balance + item.bet);
+    if (item.mode === "rush" && item.rushConsumed) {
+      state.pachiRush = Math.min(PACHI_CONFIG.rushSpins, state.pachiRush + 1);
+      item.rushConsumed = false;
+    }
     saveState();
     updateDashboard();
   }
@@ -1146,6 +1154,8 @@
       sound.play("impact");
       return;
     }
+    const previousFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    button.focus({ preventScroll: true });
     await new Promise((resolve) => {
       let done = false;
       const finish = () => {
@@ -1153,7 +1163,14 @@
         done = true;
         button.removeEventListener("click", onPush);
         window.clearTimeout(timer);
+        const restoreFocus = document.activeElement === button;
         button.hidden = true;
+        if (restoreFocus) {
+          const target = previousFocus?.isConnected && !previousFocus.hidden && !previousFocus.disabled
+            ? previousFocus
+            : $("#pachinko-shoot");
+          target?.focus({ preventScroll: true });
+        }
         resolve();
       };
       const onPush = () => {
@@ -1255,6 +1272,7 @@
     if (!await waitPachi(600 + effect.rank * 170, epoch)) return;
 
     if (effect.rank >= 2 || item.hit) {
+      setMessage(message, `${effect.label} — PUSHボタンを押せ！`, effect.rank >= 3);
       await awaitPachiPush(epoch);
       if (epoch !== pachiSessionEpoch) return;
     }
@@ -1289,11 +1307,6 @@
     sound.play(item.rounds === 10 ? "jackpot" : "win");
     setMessage(message, `${PACHI_DIGITS[item.digits[0] - 1]}図柄揃い — ${item.rounds}R 大当たり！ +${formatCredit(result.payout)} CR`, true);
 
-    if (item.rushEntry) {
-      state.pachiRush = PACHI_CONFIG.rushSpins;
-      saveState();
-      renderPachiHUD();
-    }
     if (!await waitPachi(item.rounds === 10 ? 1450 : 1050, epoch)) return;
     jackpot.hidden = true;
     if (item.rushEntry) await showPachiRushEntry(epoch);
@@ -1369,9 +1382,11 @@
     }
 
     const rushReserved = pachiQueue().filter((item) => item.mode === "rush" && !item.rushConsumed).length;
+    if (state.pachiRush === 0 && pachiQueue().some((item) => item.mode === "rush")) return false;
     if (state.pachiRush > 0 && rushReserved >= state.pachiRush) return false;
 
     pachiLaunchLocked = true;
+    const launchToken = ++pachiLaunchToken;
     const epoch = pachiSessionEpoch;
     const startEntered = randomInt(10000) < PACHI_CONFIG.startChance;
     const mode = state.pachiRush > 0 ? "rush" : "normal";
@@ -1411,9 +1426,11 @@
     } finally {
       animation.cancel();
       ball.remove();
-      pachiLaunchLocked = false;
-      updatePachiControls();
-      processPachiQueue();
+      if (epoch === pachiSessionEpoch && launchToken === pachiLaunchToken) {
+        pachiLaunchLocked = false;
+        updatePachiControls();
+        processPachiQueue();
+      }
     }
   }
 
@@ -1459,11 +1476,16 @@
   });
   window.addEventListener("midnight-reset", () => {
     pachiSessionEpoch += 1;
+    pachiLaunchToken += 1;
+    pachiAlertTicket += 1;
     pachiProcessing = false;
     pachiCurrent = null;
     pachiLaunchLocked = false;
     setPachiAuto(false);
     $("#pachi-ball-layer").replaceChildren();
+    $("#pachi-push").hidden = true;
+    $("#pachi-prealert-copy").hidden = true;
+    $("#pachi-machine").classList.remove("is-prealert");
     window.setTimeout(() => {
       setPachiPhase("idle");
       setPachiSymbols([3, 7, 5]);

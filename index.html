@@ -164,7 +164,7 @@
               <div class="card-body">
                 <div class="game-meta"><span>SMART PACHINKO</span><span>1 PLAYER</span></div>
                 <h3>SAKURA <i>∞</i></h3>
-                <p>光る盤面、弾ける玉。中央のFEVERポケットを狙え。</p>
+                <p>先バレ、保留、激アツリーチ。桜図柄をそろえてRUSHを掴め。</p>
                 <button class="card-play" type="button" data-open-game="pachinko">PLAY NOW <span aria-hidden="true">↗</span></button>
               </div>
             </article>
@@ -342,46 +342,121 @@
         <header class="game-heading">
           <button class="back-button" type="button" data-open-game="lobby"><span aria-hidden="true">←</span> FLOOR</button>
           <div>
-            <span class="game-kicker">JAPAN / SMART PACHINKO 04</span>
-            <h1 tabindex="-1">SAKURA <em>∞</em></h1>
+            <span class="game-kicker">JAPAN / DIGITAL PACHINKO 04</span>
+            <h1 tabindex="-1">P SAKURA <em>∞</em></h1>
           </div>
           <button class="rules-button" type="button" data-open-rules="pachinko">遊び方 <span aria-hidden="true">?</span></button>
         </header>
 
         <div class="game-layout pachinko-layout">
           <div class="game-stage pachinko-stage">
-            <div class="pachinko-board" id="pachinko-board" aria-label="パチンコ盤面">
-              <div class="pachinko-title" aria-hidden="true"><span>S A K U R A</span><strong>∞</strong></div>
-              <div class="pins" id="pachinko-pins" aria-hidden="true"></div>
-              <div class="pachinko-ball" id="pachinko-ball" aria-hidden="true"></div>
-              <div class="pockets" aria-hidden="true">
-                <span data-multiplier="0">MISS</span>
-                <span data-multiplier="1">×1</span>
-                <span data-multiplier="2">×2</span>
-                <span class="fever-pocket" data-multiplier="8">FEVER<br>×8</span>
-                <span data-multiplier="2">×2</span>
-                <span data-multiplier="1">×1</span>
-                <span data-multiplier="0">MISS</span>
+            <div class="pachi-machine" id="pachi-machine" data-phase="idle" data-mode="normal">
+              <div class="pachi-top-lamp" id="pachi-alert-lamp" aria-hidden="true">
+                <span>S</span><span>A</span><span>K</span><span>U</span><span>R</span><span>A</span>
+              </div>
+              <div class="pachi-frame-light pachi-frame-light-left" aria-hidden="true"></div>
+              <div class="pachi-frame-light pachi-frame-light-right" aria-hidden="true"></div>
+
+              <div class="pachi-board" id="pachinko-board" aria-label="P SAKURA∞ パチンコ盤面">
+                <div class="pachi-orbit pachi-orbit-a" aria-hidden="true"></div>
+                <div class="pachi-orbit pachi-orbit-b" aria-hidden="true"></div>
+                <div class="pachi-pins" id="pachinko-pins" aria-hidden="true"></div>
+                <div class="pachi-ball-layer" id="pachi-ball-layer" aria-hidden="true"></div>
+
+                <div class="pachi-lcd" id="pachi-lcd">
+                  <div class="pachi-lcd-scan" aria-hidden="true"></div>
+                  <div class="pachi-petals" aria-hidden="true">
+                    <i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+                  </div>
+                  <div class="pachi-lcd-header">
+                    <span class="pachi-mode-badge" id="pachi-mode-badge">通常時</span>
+                    <span class="pachi-st-counter" id="pachi-st-counter">大当り 1 / 39.9</span>
+                  </div>
+                  <div class="pachi-scene-title" aria-hidden="true">
+                    <small>MIDNIGHT BLOOM</small>
+                    <strong>桜</strong>
+                    <span>INFINITY</span>
+                  </div>
+                  <div class="pachi-effect-copy" id="pachi-effect-copy" aria-hidden="true"></div>
+                  <div class="pachi-symbols" aria-label="液晶図柄">
+                    <span class="pachi-symbol pachi-symbol-left" id="pachi-symbol-left">三</span>
+                    <span class="pachi-symbol pachi-symbol-center" id="pachi-symbol-center">七</span>
+                    <span class="pachi-symbol pachi-symbol-right" id="pachi-symbol-right">五</span>
+                  </div>
+                  <div class="pachi-reach-banner" id="pachi-reach-banner" aria-hidden="true"></div>
+                  <button class="pachi-push" id="pachi-push" type="button" hidden>
+                    <span>押</span><small>PUSH</small>
+                  </button>
+                  <div class="pachi-jackpot" id="pachi-jackpot" hidden aria-hidden="true">
+                    <span id="pachi-jackpot-kicker">超大当り</span>
+                    <strong id="pachi-jackpot-rounds">10R</strong>
+                    <small id="pachi-jackpot-pay">+0 CR</small>
+                  </div>
+                  <div class="pachi-rush-overlay" id="pachi-rush-overlay" hidden aria-hidden="true">
+                    <span>突入</span><strong>宵桜 RUSH</strong><small>ST 30</small>
+                  </div>
+                  <div class="pachi-prealert-copy" id="pachi-prealert-copy" hidden aria-hidden="true">先バレ</div>
+                </div>
+
+                <div class="pachi-start" id="pachi-start" aria-hidden="true">
+                  <span>START</span><i></i>
+                </div>
+                <div class="pachi-out" aria-hidden="true">OUT</div>
+
+                <div class="pachi-hold-row">
+                  <span class="pachi-hold-label">保留</span>
+                  <ol class="pachi-holds" id="pachi-holds" aria-label="保留玉 最大4個">
+                    <li aria-label="保留1 空き"><span></span></li>
+                    <li aria-label="保留2 空き"><span></span></li>
+                    <li aria-label="保留3 空き"><span></span></li>
+                    <li aria-label="保留4 空き"><span></span></li>
+                  </ol>
+                  <span class="pachi-hold-count" id="pachi-hold-count">0 / 4</span>
+                </div>
               </div>
             </div>
-            <div class="machine-message" id="pachinko-message" aria-live="polite">玉数を選んで、SHOOTを押してください。</div>
+            <div class="machine-message pachi-message" id="pachinko-message" aria-live="polite">ハンドルを回して、中央のSTARTを狙ってください。</div>
           </div>
 
-          <aside class="control-panel">
-            <div class="panel-label"><span>BALL VALUE</span><strong><span id="pachinko-bet-display">25</span> CR</strong></div>
+          <aside class="control-panel pachi-controls">
+            <div class="pachi-status-card" data-mode="normal">
+              <span id="pachi-status-label">NORMAL MODE</span>
+              <strong id="pachi-status-value">1 / 39.9</strong>
+              <small id="pachi-status-note">ヘソ入賞時</small>
+              <div class="pachi-st-gauge" role="progressbar" aria-label="RUSH残り回転" aria-valuemin="0" aria-valuemax="30" aria-valuenow="0"><i id="pachi-st-fill"></i></div>
+            </div>
+
+            <div class="panel-label panel-label-spaced"><span>BALL RATE</span><strong><span id="pachinko-bet-display">10</span> CR</strong></div>
             <div class="bet-options" role="group" aria-label="パチンコの玉数">
-              <button type="button" data-pachinko-bet="10">10</button>
-              <button class="is-selected" type="button" data-pachinko-bet="25" aria-pressed="true">25</button>
+              <button class="is-selected" type="button" data-pachinko-bet="10" aria-pressed="true">10</button>
+              <button type="button" data-pachinko-bet="25">25</button>
               <button type="button" data-pachinko-bet="50">50</button>
               <button type="button" data-pachinko-bet="100">100</button>
             </div>
             <button class="action-button action-pink" id="pachinko-shoot" type="button">
-              <span>SHOOT</span><small>玉を打ち出す</small>
+              <span>SHOOT</span><small>1玉を打ち出す</small>
             </button>
-            <div class="fever-meter-wrap">
-              <div class="panel-label"><span>FEVER CHANCE</span><strong id="fever-label">0 / 5</strong></div>
-              <div class="fever-meter" role="progressbar" aria-label="フィーバーチャンス" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0"><span id="fever-fill"></span></div>
-              <p>当たりポケットに入るとゲージUP。満タンで次のFEVER率が上昇。</p>
+
+            <button class="pachi-auto" id="pachi-auto-toggle" type="button" aria-pressed="false">
+              <span>AUTO PLAY</span><strong>OFF</strong>
+            </button>
+
+            <div class="pachi-custom">
+              <div class="panel-label"><span>演出カスタム</span><small>CUSTOM</small></div>
+              <button class="pachi-setting" id="pachi-prealert-toggle" type="button" aria-pressed="true">
+                <span><b>先バレ</b><small id="pachi-prealert-trust">期待度 約40%</small></span>
+                <strong>ON</strong>
+              </button>
+              <button class="pachi-setting" id="pachi-speed-toggle" type="button" aria-pressed="false">
+                <span><b>演出速度</b><small>変動時間を切り替え</small></span>
+                <strong>標準</strong>
+              </button>
+              <button class="pachi-preview" id="pachi-prealert-preview" type="button">先バレを試聴 <span aria-hidden="true">▶</span></button>
+            </div>
+
+            <div class="pachi-session-stats">
+              <div><span>TOTAL PAY</span><strong><span id="pachi-total-pay">0</span> CR</strong></div>
+              <div><span>初当り</span><strong><span id="pachi-hit-count">0</span> 回</strong></div>
             </div>
           </aside>
         </div>
